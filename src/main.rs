@@ -22,10 +22,23 @@ fn setup(mut command: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn player_move(input: Res<Input<KeyCode>>, mut query: Query<(&mut Transform), With<Player>>) {
+    let mut x = 0;
+    let mut y = 0;
+    if input.pressed(KeyCode::W) {
+        y += 1
+    }
+    if input.pressed(KeyCode::A) {
+        x -= 1
+    }
+    if input.pressed(KeyCode::S) {
+        y -= 1
+    }
     if input.pressed(KeyCode::D) {
-        for mut item in query.iter_mut() {
-            item.translation.x +=  1_f32;
-        }
+        x += 1
+    };
+    for mut item in query.iter_mut() {
+        item.translation.x += x as f32;
+        item.translation.y += y as f32;
     }
 }
 

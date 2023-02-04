@@ -1,4 +1,4 @@
-use bevy::{ecs::bundle, prelude::*};
+use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 use leafwing_input_manager::prelude::*;
@@ -12,7 +12,12 @@ fn main() {
         .add_plugin(InputManagerPlugin::<wasd::Action>::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .insert_resource(RapierConfiguration {
-            gravity: Vec2::new(0.0, -2000.0),
+            gravity: Vec2::Y * -294.,
+            timestep_mode: TimestepMode::Variable {
+                max_dt: 1.0 / 60.0,
+                time_scale: 1.0,
+                substeps: 10,
+            },
             ..Default::default()
         })
         .add_startup_system(setup)
@@ -72,6 +77,8 @@ struct RapierBundle {
     // rigid_body:RigidBody,
     velocity: Velocity,
     rigid_body: RigidBody,
+    collider: Collider,
+    locked_axes: LockedAxes,
 }
 
 impl Default for RapierBundle {
@@ -79,6 +86,8 @@ impl Default for RapierBundle {
         Self {
             velocity: Velocity::default(),
             rigid_body: RigidBody::Dynamic,
+            collider: Collider::cuboid(9., 16.),
+            locked_axes: LockedAxes::ROTATION_LOCKED_Z,
         }
     }
 }

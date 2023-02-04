@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::bundle, prelude::*};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 use leafwing_input_manager::prelude::*;
@@ -23,6 +23,7 @@ fn main() {
         .add_startup_system(setup)
         .insert_resource(LevelSelection::Uid(0))
         .register_ldtk_entity::<PlayerBundle>("Player")
+        .register_ldtk_int_cell::<BlockBundle>(1)
         .add_system(leafwing_input)
         .run();
 }
@@ -69,11 +70,11 @@ struct PlayerBundle {
     input: wasd::InputBundle,
 
     #[bundle]
-    rapier: RapierBundle,
+    rapier: PlayerRapierBundle,
 }
 
 #[derive(Bundle)]
-struct RapierBundle {
+struct PlayerRapierBundle {
     // rigid_body:RigidBody,
     velocity: Velocity,
     rigid_body: RigidBody,
@@ -81,13 +82,35 @@ struct RapierBundle {
     locked_axes: LockedAxes,
 }
 
-impl Default for RapierBundle {
+impl Default for PlayerRapierBundle {
     fn default() -> Self {
         Self {
             velocity: Velocity::default(),
             rigid_body: RigidBody::Dynamic,
             collider: Collider::cuboid(9., 16.),
             locked_axes: LockedAxes::ROTATION_LOCKED_Z,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
+struct BlockBundle {
+    #[bundle]
+    block_rapier: BlockRapierBundle,
+}
+
+#[derive(Clone, Debug, Bundle, LdtkIntCell)]
+struct BlockRapierBundle {
+    pub collider: Collider,
+    pub rigid_body: RigidBody,
+}
+
+impl Default for BlockRapierBundle {
+    fn default() -> Self {
+        println!("use default");
+        Self {
+            collider: Collider::cuboid(8., 8.),
+            rigid_body: RigidBody::Fixed,
         }
     }
 }

@@ -55,6 +55,8 @@ fn leafwing_input(
         velocity.linvel.x = -MOVE_SPEED;
     } else if action.pressed(wasd::Action::Right) {
         velocity.linvel.x = MOVE_SPEED;
+    } else if action.pressed(wasd::Action::Jump){
+        velocity.linvel.y = MOVE_SPEED
     }
 }
 

@@ -1,5 +1,6 @@
-use bevy::{ecs::bundle, prelude::*};
+use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_rapier2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 
@@ -8,6 +9,8 @@ mod wasd;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(bevy_editor_pls::prelude::EditorPlugin)
+        .add_plugin(InspectableRapierPlugin)
         .add_plugin(LdtkPlugin)
         .add_plugin(InputManagerPlugin::<wasd::Action>::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))

@@ -7,6 +7,7 @@ pub enum Action {
     Down,
     Right,
     Left,
+    Jump,
 }
 
 #[derive(Bundle)]
@@ -25,29 +26,10 @@ impl Default for InputBundle {
                     (KeyCode::A, Left),
                     (KeyCode::S, Down),
                     (KeyCode::D, Right),
+                    (KeyCode::Space, Jump),
                 ]),
                 ..default()
             },
         }
     }
-}
-
-pub fn handle_common_wasd_transform(action: &ActionState<Action>, mut transform: Mut<Transform>) {
-    let mut x = 0;
-    let mut y = 0;
-    if action.pressed(Action::Up) {
-        y += 1
-    }
-    if action.pressed(Action::Left) {
-        x -= 1
-    }
-    if action.pressed(Action::Down) {
-        y -= 1
-    }
-    if action.pressed(Action::Right) {
-        x += 1
-    };
-
-    transform.translation.x += x as f32;
-    transform.translation.y += y as f32;
 }

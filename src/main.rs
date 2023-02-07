@@ -3,7 +3,9 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_rapier2d::prelude::*;
 use leafwing_input_manager::prelude::*;
+use wall::Wall;
 
+mod wall;
 mod wasd;
 
 fn main() {
@@ -12,6 +14,7 @@ fn main() {
         .add_plugin(bevy_editor_pls::prelude::EditorPlugin)
         .add_plugin(InspectableRapierPlugin)
         .add_plugin(LdtkPlugin)
+        .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InputManagerPlugin::<wasd::Action>::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .insert_resource(RapierConfiguration {
@@ -26,8 +29,9 @@ fn main() {
         .add_startup_system(setup)
         .insert_resource(LevelSelection::Uid(0))
         .register_ldtk_entity::<PlayerBundle>("Player")
-        .register_ldtk_int_cell::<BlockBundle>(1)
+        .register_ldtk_int_cell::<CellBundle>(1)
         .add_system(leafwing_input)
+        .add_system(wall::spawn_wall_collision)
         .run();
 }
 
@@ -55,7 +59,7 @@ fn leafwing_input(
         velocity.linvel.x = -MOVE_SPEED;
     } else if action.pressed(wasd::Action::Right) {
         velocity.linvel.x = MOVE_SPEED;
-    } else if action.pressed(wasd::Action::Jump){
+    } else if action.pressed(wasd::Action::Jump) {
         velocity.linvel.y = MOVE_SPEED
     }
 }
@@ -98,24 +102,7 @@ impl Default for PlayerRapierBundle {
     }
 }
 
-#[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
-struct BlockBundle {
-    #[bundle]
-    block_rapier: BlockRapierBundle,
-}
-
-#[derive(Clone, Debug, Bundle, LdtkIntCell)]
-struct BlockRapierBundle {
-    pub collider: Collider,
-    pub rigid_body: RigidBody,
-}
-
-impl Default for BlockRapierBundle {
-    fn default() -> Self {
-        println!("use default");
-        Self {
-            collider: Collider::cuboid(8., 8.),
-            rigid_body: RigidBody::Fixed,
-        }
-    }
+#[derive(Debug, LdtkIntCell, Bundle)]
+struct CellBundle {
+    wall: Wall,
 }

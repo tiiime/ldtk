@@ -10,7 +10,7 @@ bevy = "0.9.1"
 bevy_ecs_ldtk = "0.5.0"
 bevy_ecs_tilemap = "0.9.0"
 leafwing-input-manager = "0.8.0"
-bevy_rapier2d = "0.20"
+bevy_rapier2d = { version = "0.20.0" }
 bevy-inspector-egui-rapier = { version = "*", features = ["rapier2d"]}
 bevy_editor_pls = {git = "https://github.com/jakobhellermann/bevy_editor_pls"}
 

@@ -18,7 +18,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-const MOVE_SPEED: f32 = 200.;
+const MOVE_SPEED: f32 = 80.;
 
 fn leafwing_input(mut player_query: Query<(&mut Velocity, &ActionState<Action>), With<Player>>) {
     if player_query.is_empty() {
@@ -34,7 +34,7 @@ fn leafwing_input(mut player_query: Query<(&mut Velocity, &ActionState<Action>),
         velocity.linvel.x = MOVE_SPEED;
     }
     if action.pressed(wasd::Action::Jump) {
-        velocity.linvel.y = MOVE_SPEED
+        velocity.linvel.y = 160.;
     }
 }
 

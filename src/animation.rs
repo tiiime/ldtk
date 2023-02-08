@@ -29,6 +29,7 @@ enum AnimationState {
     Idle,
     Jump,
     Run,
+    Fall,
 }
 
 #[derive(Debug, Clone, Component)]
@@ -128,14 +129,19 @@ impl FromWorld for AnimationResource {
             //     AnimationMeta{len:6,frame_time: 20.},
             // );
 
-            // let fall_atlas = TextureAtlas::from_grid(
-            //     asset_server.load("Main Characters/Virtual Guy/Fall (32x32).png"),
-            //     Vec2::splat(32.),
-            //     1,
-            //     1,
-            //     None,
-            //     None,
-            // );
+            let fall_atlas = TextureAtlas::from_grid(
+                asset_server.load("Main Characters/Virtual Guy/Fall (32x32).png"),
+                Vec2::splat(32.),
+                1,
+                1,
+                None,
+                None,
+            );
+            res.add(
+                AnimationState::Fall,
+                texture_atles.add(fall_atlas),
+                AnimationMeta::new(1, 1),
+            )
         });
         res
     }
@@ -164,11 +170,11 @@ impl PhoxAnimationBundle {
     }
 }
 
-/// 
+///
 /// 更新 [PhoxAnimationBundle] 内 [FrameTime]
 /// 根据 frame_time 计算动画 index
 /// 更新 [TextureAtlasSprite] index
-/// 
+///
 fn animate_sprite(
     mut animations: Query<(&mut TextureAtlasSprite, &AnimationMeta, &mut FrameTime)>,
     time: Res<Time>,
@@ -187,20 +193,20 @@ fn animate_sprite(
     }
 }
 
-/// 
+///
 /// 为没有 [AnimationMeta] 的 [Player] entity 添加动画信息
-/// 
+///
 fn append_animation_for_player(
     mut commands: Commands,
-    mut query: Query<(Entity), (With<Player>, Without<AnimationMeta>)>,
+    mut query: Query<Entity, (With<Player>, Without<AnimationMeta>)>,
     animations: Res<AnimationResource>,
 ) {
     if query.is_empty() {
         return;
     }
-    let (entity) = query.single_mut();
+    let entity = query.single_mut();
 
-    let Some((texture_atlas, animation)) = animations.get(AnimationState::Idle) else {    error!("Failed to find animation: Idle");        return;};
+    let Some((_texture_atlas, animation)) = animations.get(AnimationState::Idle) else {    error!("Failed to find animation: Idle");        return;};
 
     commands
         .entity(entity)
@@ -209,7 +215,7 @@ fn append_animation_for_player(
 
 ///
 /// 更新动画状态
-/// 
+///
 fn change_player_animation(
     mut player: Query<
         (
@@ -226,7 +232,7 @@ fn change_player_animation(
     if player.is_empty() {
         return;
     }
-    let (player, mut atlas, mut animation, mut sprite, velocity) = player.single_mut();
+    let (_player, mut atlas, mut animation, mut sprite, velocity) = player.single_mut();
     if velocity.linvel.x < -0.1 {
         sprite.flip_x = true;
     } else if velocity.linvel.x > 0.1 {
@@ -238,7 +244,7 @@ fn change_player_animation(
         AnimationState::Jump
     } else if velocity.linvel.y < -0.01 {
         //Falling if no on ground
-        AnimationState::Idle
+        AnimationState::Fall
     } else if velocity.linvel.x != 0.0 {
         // Animation::MaskFall
         // if any move keys pressed set run sprite

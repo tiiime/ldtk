@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::Player;
+use crate::components::Player;
 
 ///
 /// ref: https://github.com/PhaestusFox/bevy_platformer

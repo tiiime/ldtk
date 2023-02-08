@@ -3,11 +3,13 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_rapier2d::prelude::*;
 use leafwing_input_manager::prelude::*;
-use wall::Wall;
 
 mod animation;
-mod wall;
+mod collision;
 mod wasd;
+
+use collision::*;
+use animation::*;
 
 fn main() {
     App::new()
@@ -18,7 +20,8 @@ fn main() {
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InputManagerPlugin::<wasd::Action>::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugin(animation::AnimationPlugin)
+        .add_plugin(AnimationPlugin)
+        .add_plugin(FixedBlockCollisionPlugin)
         .insert_resource(RapierConfiguration {
             gravity: Vec2::Y * -294.,
             timestep_mode: TimestepMode::Variable {
@@ -33,7 +36,6 @@ fn main() {
         .register_ldtk_entity::<PlayerBundle>("Player")
         .register_ldtk_int_cell::<CellBundle>(1)
         .add_system(leafwing_input)
-        .add_system(wall::spawn_wall_collision)
         .run();
 }
 
@@ -105,5 +107,5 @@ impl Default for PlayerRapierBundle {
 
 #[derive(Debug, LdtkIntCell, Bundle)]
 struct CellBundle {
-    wall: Wall,
+    block: FixedBlock,
 }

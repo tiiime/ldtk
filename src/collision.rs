@@ -1,15 +1,38 @@
-use bevy::{prelude::*, utils::{HashMap, HashSet}};
+use bevy::{
+    prelude::*,
+    utils::{HashMap, HashSet},
+};
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 
+///
+/// 添加 [FixedBlock] 标记的 Ltdk cell 
+/// 会拥有 Fixed collision
+/// 
 #[derive(Clone, Debug, Default, Component)]
-pub struct Wall;
+pub struct FixedBlock;
 
-pub fn spawn_wall_collision(
+/// 
+/// 为 [FixedBlock] 添加 collision
+/// 
+pub struct FixedBlockCollisionPlugin;
+
+impl Plugin for FixedBlockCollisionPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system(spawn_fixed_block_collision);
+    }
+}
+
+///
+/// ref: https://github.com/Trouv/bevy_ecs_ldtk
+/// 获取所有 [FixedBlock] 标记，计算合并相邻 entity，生成 collision
+/// 避免大量 collision 带来的性能损耗
+/// 
+fn spawn_fixed_block_collision(
     mut commands: Commands,
-    wall_query: Query<(&GridCoords, &Parent), Added<Wall>>,
-    parent_query: Query<&Parent, Without<Wall>>,
+    wall_query: Query<(&GridCoords, &Parent), Added<FixedBlock>>,
+    parent_query: Query<&Parent, Without<FixedBlock>>,
     level_query: Query<(Entity, &Handle<LdtkLevel>)>,
     levels: Res<Assets<LdtkLevel>>,
 ) {

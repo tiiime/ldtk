@@ -5,6 +5,7 @@ use bevy_rapier2d::prelude::*;
 use leafwing_input_manager::prelude::*;
 use wall::Wall;
 
+mod animation;
 mod wall;
 mod wasd;
 
@@ -26,12 +27,16 @@ fn main() {
             },
             ..Default::default()
         })
+        .init_resource::<animation::AnimationResource>()
         .add_startup_system(setup)
         .insert_resource(LevelSelection::Uid(0))
         .register_ldtk_entity::<PlayerBundle>("Player")
         .register_ldtk_int_cell::<CellBundle>(1)
         .add_system(leafwing_input)
         .add_system(wall::spawn_wall_collision)
+        .add_system(animation::change_player_animation)
+        .add_system(animation::append_animation_for_player)
+        .add_system(animation::animate_sprite)
         .run();
 }
 
@@ -69,10 +74,7 @@ pub struct Player;
 
 #[derive(Bundle, Default, LdtkEntity)]
 struct PlayerBundle {
-    #[sprite_bundle("player.png")]
-    #[bundle]
-    sprite_bundle: SpriteBundle,
-
+    sprite: SpriteSheetBundle,
     player: Player,
 
     #[bundle]

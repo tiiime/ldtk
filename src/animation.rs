@@ -5,6 +5,25 @@ use bevy_rapier2d::prelude::*;
 
 use crate::Player;
 
+///
+/// ref: https://github.com/PhaestusFox/bevy_platformer
+///
+/// 动画插件
+/// [animate_sprite]: 更新动画帧
+/// []
+///
+#[derive(Debug)]
+pub struct AnimationPlugin;
+
+impl Plugin for AnimationPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<AnimationResource>()
+            .add_system(animate_sprite)
+            .add_system(append_animation_for_player)
+            .add_system(change_player_animation);
+    }
+}
+
 #[derive(Debug, Hash, PartialEq, Eq)]
 enum AnimationState {
     Idle,
@@ -13,13 +32,25 @@ enum AnimationState {
 }
 
 #[derive(Debug, Clone, Component)]
-pub struct AnimationMeta {
+struct AnimationMeta {
     len: usize,
     frame_time: f32,
 }
 
+impl AnimationMeta {
+    fn new(len: usize, fps: usize) -> AnimationMeta {
+        AnimationMeta {
+            len: len,
+            frame_time: 1. / (fps as f32),
+        }
+    }
+}
+
+///
+/// 加载动画资源 Resource
+///
 #[derive(Debug, Resource)]
-pub struct AnimationResource {
+struct AnimationResource {
     map: HashMap<AnimationState, (Handle<TextureAtlas>, AnimationMeta)>,
 }
 
@@ -52,10 +83,7 @@ impl FromWorld for AnimationResource {
             res.add(
                 AnimationState::Idle,
                 texture_atles.add(idel_atlas),
-                AnimationMeta {
-                    len: 11,
-                    frame_time: 1. / 20.,
-                },
+                AnimationMeta::new(11, 20),
             );
 
             let run_atlas = TextureAtlas::from_grid(
@@ -69,10 +97,7 @@ impl FromWorld for AnimationResource {
             res.add(
                 AnimationState::Run,
                 texture_atles.add(run_atlas),
-                AnimationMeta {
-                    len: 12,
-                    frame_time: 1. / 20.,
-                },
+                AnimationMeta::new(12, 20),
             );
 
             let jump_atlas = TextureAtlas::from_grid(
@@ -86,10 +111,7 @@ impl FromWorld for AnimationResource {
             res.add(
                 AnimationState::Jump,
                 texture_atles.add(jump_atlas),
-                AnimationMeta {
-                    len: 1,
-                    frame_time: 1.,
-                },
+                AnimationMeta::new(1, 1),
             );
 
             // let djump_atlas = TextureAtlas::from_grid(
@@ -120,16 +142,21 @@ impl FromWorld for AnimationResource {
 }
 
 #[derive(Component)]
-pub struct FrameTime(pub f32);
+struct FrameTime(pub f32);
 
+///
+/// 添加 [PhoxAnimationBundle] 到指定 entity，就可以播放动画
+/// 包含动画相关元信息 [AnimationMeta]
+/// 以及当前引擎执行过帧的记数 [FrameTime]，初始为 0
+///
 #[derive(Bundle)]
-pub struct PhoxAnimationBundle {
-    pub animaiton: AnimationMeta,
+struct PhoxAnimationBundle {
+    animaiton: AnimationMeta,
     frame_time: FrameTime,
 }
 
 impl PhoxAnimationBundle {
-    pub fn new(animaiton: AnimationMeta) -> PhoxAnimationBundle {
+    fn new(animaiton: AnimationMeta) -> PhoxAnimationBundle {
         PhoxAnimationBundle {
             animaiton,
             frame_time: FrameTime(0.0),
@@ -137,7 +164,12 @@ impl PhoxAnimationBundle {
     }
 }
 
-pub fn animate_sprite(
+/// 
+/// 更新 [PhoxAnimationBundle] 内 [FrameTime]
+/// 根据 frame_time 计算动画 index
+/// 更新 [TextureAtlasSprite] index
+/// 
+fn animate_sprite(
     mut animations: Query<(&mut TextureAtlasSprite, &AnimationMeta, &mut FrameTime)>,
     time: Res<Time>,
 ) {
@@ -155,7 +187,10 @@ pub fn animate_sprite(
     }
 }
 
-pub fn append_animation_for_player(
+/// 
+/// 为没有 [AnimationMeta] 的 [Player] entity 添加动画信息
+/// 
+fn append_animation_for_player(
     mut commands: Commands,
     mut query: Query<(Entity), (With<Player>, Without<AnimationMeta>)>,
     animations: Res<AnimationResource>,
@@ -172,7 +207,10 @@ pub fn append_animation_for_player(
         .insert(PhoxAnimationBundle::new(animation));
 }
 
-pub fn change_player_animation(
+///
+/// 更新动画状态
+/// 
+fn change_player_animation(
     mut player: Query<
         (
             &Player,

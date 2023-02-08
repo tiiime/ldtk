@@ -18,6 +18,7 @@ fn main() {
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InputManagerPlugin::<wasd::Action>::default())
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugin(animation::AnimationPlugin)
         .insert_resource(RapierConfiguration {
             gravity: Vec2::Y * -294.,
             timestep_mode: TimestepMode::Variable {
@@ -27,16 +28,12 @@ fn main() {
             },
             ..Default::default()
         })
-        .init_resource::<animation::AnimationResource>()
         .add_startup_system(setup)
         .insert_resource(LevelSelection::Uid(0))
         .register_ldtk_entity::<PlayerBundle>("Player")
         .register_ldtk_int_cell::<CellBundle>(1)
         .add_system(leafwing_input)
         .add_system(wall::spawn_wall_collision)
-        .add_system(animation::change_player_animation)
-        .add_system(animation::append_animation_for_player)
-        .add_system(animation::animate_sprite)
         .run();
 }
 
@@ -62,9 +59,11 @@ fn leafwing_input(
 
     if action.pressed(wasd::Action::Left) {
         velocity.linvel.x = -MOVE_SPEED;
-    } else if action.pressed(wasd::Action::Right) {
+    } 
+    if action.pressed(wasd::Action::Right) {
         velocity.linvel.x = MOVE_SPEED;
-    } else if action.pressed(wasd::Action::Jump) {
+    } 
+    if action.pressed(wasd::Action::Jump) {
         velocity.linvel.y = MOVE_SPEED
     }
 }

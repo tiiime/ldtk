@@ -3,10 +3,9 @@ use leafwing_input_manager::prelude::*;
 
 pub struct WasdPlugin;
 
-impl Plugin for WasdPlugin{
+impl Plugin for WasdPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_plugin(InputManagerPlugin::<Action>::default());
+        app.add_plugin(InputManagerPlugin::<Action>::default());
     }
 }
 
@@ -17,6 +16,7 @@ pub enum Action {
     Right,
     Left,
     Jump,
+    Speed,
 }
 
 #[derive(Bundle)]
@@ -36,6 +36,7 @@ impl Default for InputBundle {
                     (KeyCode::S, Down),
                     (KeyCode::D, Right),
                     (KeyCode::Space, Jump),
+                    (KeyCode::LShift, Speed),
                 ]),
                 ..default()
             },

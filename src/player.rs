@@ -12,9 +12,8 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .register_ldtk_entity::<PlayerBundle>("Player")
-        .add_system(leafwing_input);
+        app.register_ldtk_entity::<PlayerBundle>("Player")
+            .add_system(leafwing_input);
     }
 }
 
@@ -27,11 +26,17 @@ fn leafwing_input(mut player_query: Query<(&mut Velocity, &ActionState<Action>),
 
     let (mut velocity, action) = player_query.single_mut();
 
+    let speed = if action.pressed(wasd::Action::Speed) {
+        MOVE_SPEED * 2.
+    } else {
+        MOVE_SPEED
+    };
+
     if action.pressed(wasd::Action::Left) {
-        velocity.linvel.x = -MOVE_SPEED;
+        velocity.linvel.x = -speed;
     }
     if action.pressed(wasd::Action::Right) {
-        velocity.linvel.x = MOVE_SPEED;
+        velocity.linvel.x = speed;
     }
     if action.pressed(wasd::Action::Jump) {
         velocity.linvel.y = 160.;

@@ -16,19 +16,18 @@ use wasd::*;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
-
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
+            watch_for_changes: true,
+            ..Default::default()
+        }))
         // 开发 inspect
         .add_plugin(bevy_editor_pls::prelude::EditorPlugin)
         .add_plugin(InspectableRapierPlugin)
-
-
         // 游戏逻辑插件
         .add_plugin(AnimationPlugin)
         .add_plugin(FixedBlockCollisionPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(WasdPlugin)
-
         // 物理引擎插件
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .insert_resource(RapierConfiguration {
@@ -40,7 +39,6 @@ fn main() {
             },
             ..Default::default()
         })
-
         // Ldtk 配置
         .add_plugin(LdtkPlugin)
         .add_startup_system(setup)
